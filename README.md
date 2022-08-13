@@ -27,25 +27,25 @@ This includes:
 ### FP01. FMCW Waveform Design
 
 I could determine the parameters (B, Tchirp, slope) for designing a FMCW waveform by below equations
-$$
+```math
 B_{sweep} = c / 2 * res\\
 T_{chirp} = 5.5 * 2 * R_{max} / c\\
 Slope = B / T_{chirp}
-$$
+```
 The result of slope is `2.0455e+13` which meets the specifications.
 
 ### FP02. Simulation Loop
 
 I modeled the transmitted signal and received signal with  below equations:
-$$
+```math
 Tx(t) = cos(2\pi(f_c t + \frac{\alpha * t ^2}{2})) \\
 Rx(t) = cos(2\pi(f_c (t-\tau) + \frac{\alpha * (t-\tau) ^2}{2}))
-$$
-The time delay $$\tau$$ is the travel time of transmitted signal therefore I modeled $$\tau$$ as below equations:
-$$
+```
+The time delay $\tau$ is the travel time of transmitted signal therefore I modeled $\tau$ as below equations:
+```matg
 \tau = 2 * R(t)/c \\
 R(t) = R_{init} + V_{init} \times t;
-$$
+```
 
 ### FP03. Range FFT (1st FFT)
 
@@ -72,14 +72,51 @@ I set the initial position of a target object to 110m and the velocity to -20m/s
 
 ### FP04. 2D CFAR
 
-| CRITERIA                                                     | MEETS SPECIFICATIONS                                         |
-| :----------------------------------------------------------- | :----------------------------------------------------------- |
-| Implement the 2D CFAR process on the output of 2D FFT operation, i.e the Range Doppler Map. | The 2D CFAR processing should be able to suppress the noise and separate the target signal. The output should match the image shared in walkthrough. |
-| Create a CFAR README File                                    | In a README file, write brief explanations for the following:Implementation steps for the 2D CFAR process.Selection of Training, Guard cells and offset.Steps taken to suppress the non-thresholded cells at the edges. |
+I implemented 2D CFAR with `conv2`, <u>which is 2D convolution function</u> of MATLAB with below procedures.
 
-I implemented 2D CFAR with `conv2` which is 2D convolution function of MATLAB.
+1. decide the training cell(`Td, Tr`) and guard cell(`Gd, Gr`) offsets and threshold in dB(`threshold`).
 
+2. create a convolution kernel to sum all values from training cells.
+3. perform 2D convolution to Radar Doppler Map(RDM) that converted into power and divide into # of training cells to get noise level.
+4. calculate `threshold` from noise level  and `offset` .
+5. pad `threshold` and convert into dB scale and compare to RDM.
+6. plot result.
+
+```MATLAB
+% Step1. decide parameters for 2D CFAR
+Tr = 10; Td = 4; % Training Cells in both dimensions
+Gr = 5; Gd = 2; % Guard Cells in both dimensions
+offset = 3; % offset the threshold by SNR value in dB
+
+% Step2. create conv kernel
+kernel_cfar = ones(2*Tr+2*Gr+1, 2*Td+2*Gd+1);
+cut_r = Tr+Gr+1; % middle of kernel
+cut_d = Td+Gd+1;
+kernel_cfar(cut_r-Gr:cut_r+Gr,cut_d-Gd:cut_d+Gd) = 0; % remove guard cells
+size_kernel = sum(kernel_cfar, 'all'); % get number of training cells
+
+% Step 3~5. get noise_level from RDM, calculate threshold and compare to RDM
+threshold = offset*(conv2(db2pow_(RDM), kernel_cfar, "valid")/size_kernel);
+pad_r = round(size(kernel_cfar,1)/2-1);
+pad_d = round(size(kernel_cfar,2)/2-1);
+threshold = padarray(pow2db_(threshold), [pad_r, pad_d], inf);
+is_above_threshold = double(RDM > threshold);
+
+% Step 6. plot result
+figure,surf(doppler_axis,range_axis,is_above_threshold);
+colorbar;
+
+% define db2pow and pow2db 
+% since I don't have Signal Processing Toolbox
+function pow = db2pow_(db)
+    pow = 10.^(db/10);
+end
+
+function db = pow2db_(pow)
+    db = 10 * log10(pow);
+end
 ```
-```
+
+The output of 2D CFAR is below graph and this describes the target object I defined.
 
 ![2D CFAR](images/2d-cfar.png)
