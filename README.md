@@ -28,9 +28,9 @@ This includes:
 
 I could determine the parameters (B, Tchirp, slope) for designing a FMCW waveform by below equations
 
-$$ B_{sweep} = c / 2 * res\\
-T_{chirp} = 5.5 * 2 * R_{max} / c\\
-Slope = B / T_{chirp} $$
+$$ B_{sweep} = c / 2 * res $$
+$$ T_{chirp} = 5.5 * 2 * R_{max} / c $$
+$$ Slope = B / T_{chirp} $$
 
 The result of slope is `2.0455e+13` which meets the specifications.
 
@@ -38,11 +38,13 @@ The result of slope is `2.0455e+13` which meets the specifications.
 
 I modeled the transmitted signal and received signal with  below equations:
 
-$$ Tx(t) = cos(2\pi(f_c t + \frac{\alpha * t ^2}{2})) \\ Rx(t) = cos(2\pi(f_c (t-\tau) + \frac{\alpha \times (t-\tau)^2}{2} $$
+$$ Tx(t) = cos(2\pi(f_c t + \frac{\alpha * t ^2}{2})) $$
+$$ Rx(t) = cos(2\pi(f_c (t-\tau) + \frac{\alpha \times (t-\tau)^2}{2} $$
 
 The time delay $\tau$ is the travel time of transmitted signal therefore I modeled $\tau$ as below equations:
 
-$$ \tau = 2 * R(t)/c \\ R(t) = R_{init} + V_{init} \times t $$
+$$ \tau = 2 * R(t)/c $$
+$$ R(t) = R_{init} + V_{init} \times t $$
 
 ### FP03. Range FFT (1st FFT)
 
