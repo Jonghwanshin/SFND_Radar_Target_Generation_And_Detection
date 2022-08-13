@@ -37,15 +37,12 @@ The result of slope is `2.0455e+13` which meets the specifications.
 ### FP02. Simulation Loop
 
 I modeled the transmitted signal and received signal with  below equations:
-```math
-Tx(t) = cos(2\pi(f_c t + \frac{\alpha * t ^2}{2})) \\
-Rx(t) = cos(2\pi(f_c (t-\tau) + \frac{\alpha * (t-\tau) ^2}{2}))
-```
+
+$ Tx(t) = cos(2\pi(f_c t + \frac{\alpha * t ^2}{2})) \\ Rx(t) = cos(2\pi(f_c (t-\tau) + \frac{\alpha * (t-\tau) $
+
 The time delay $\tau$ is the travel time of transmitted signal therefore I modeled $\tau$ as below equations:
-```matg
-\tau = 2 * R(t)/c \\
-R(t) = R_{init} + V_{init} \times t;
-```
+
+$ \tau = 2 * R(t)/c \\ R(t) = R_{init} + V_{init} \times t $
 
 ### FP03. Range FFT (1st FFT)
 
